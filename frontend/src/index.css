@@ -1,9 +1,111 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply min-h-screen bg-zinc-950 text-zinc-100 antialiased;
+/* Theme tokens (light / dark) — consumed by Tailwind `prsnt-*` colors */
+:root {
+  --prsnt-ink-rgb: 19 78 74;
+  --prsnt-surface-rgb: 240 253 250;
+  --prsnt-primary-rgb: 15 118 110;
+  --prsnt-accent-rgb: 20 184 166;
+  --prsnt-cta-rgb: 3 105 161;
+}
+
+.dark {
+  --prsnt-ink-rgb: 204 251 241;
+  --prsnt-surface-rgb: 15 23 24;
+  --prsnt-primary-rgb: 45 212 191;
+  --prsnt-accent-rgb: 94 234 212;
+  --prsnt-cta-rgb: 125 211 252;
+}
+
+@layer base {
+  html {
+    @apply font-sans antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-prsnt-surface text-prsnt-ink font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif text-prsnt-ink;
+  }
+
+  #root {
+    @apply min-h-screen font-sans bg-prsnt-surface text-prsnt-ink;
+  }
+}
+
+@layer components {
+  .prsnt-field-label {
+    @apply text-sm font-medium text-prsnt-ink/65;
+  }
+
+  .prsnt-input {
+    @apply w-full rounded-xl border border-teal-900/15 bg-white px-3 py-2.5 text-prsnt-ink shadow-sm outline-none transition-colors placeholder:text-prsnt-ink/40 focus:border-prsnt-cta focus:ring-2 focus:ring-prsnt-cta/20 dark:border-white/10 dark:bg-zinc-900/70 dark:placeholder:text-prsnt-ink/35;
+  }
+
+  .prsnt-btn-primary {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl bg-prsnt-primary px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-teal-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-prsnt-cta focus-visible:ring-offset-2 focus-visible:ring-offset-prsnt-surface disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-teal-600;
+  }
+
+  .prsnt-btn-secondary {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border-2 border-prsnt-primary/25 bg-white px-4 py-3.5 text-sm font-semibold text-prsnt-ink transition-colors hover:border-prsnt-primary/45 hover:bg-prsnt-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-prsnt-cta focus-visible:ring-offset-2 focus-visible:ring-offset-prsnt-surface disabled:cursor-not-allowed disabled:opacity-60 dark:border-prsnt-primary/35 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/80;
+  }
+
+  .prsnt-btn-ghost {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-teal-900/15 bg-white/80 px-4 py-3.5 text-sm font-semibold text-prsnt-ink transition-colors hover:border-teal-900/25 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-prsnt-cta focus-visible:ring-offset-2 focus-visible:ring-offset-prsnt-surface disabled:opacity-60 dark:border-white/10 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/80;
+  }
+
+  /** Auth screens: lifted panel on the shell background */
+  .prsnt-auth-panel {
+    @apply rounded-2xl border border-teal-900/10 bg-white/95 px-6 py-8 shadow-sm shadow-teal-900/5 sm:px-8 sm:py-10 dark:border-white/10 dark:bg-zinc-900/65 dark:shadow-black/20;
+  }
+
+  .prsnt-link {
+    @apply font-medium text-prsnt-cta underline-offset-2 hover:text-prsnt-primary hover:underline;
+  }
+
+  .prsnt-card {
+    @apply rounded-2xl border border-teal-900/10 bg-white/90 shadow-sm shadow-teal-900/5 dark:border-white/10 dark:bg-zinc-900/55 dark:shadow-black/25;
+  }
+
+  .prsnt-shell-header {
+    @apply border-b border-teal-900/10 bg-prsnt-surface/95 backdrop-blur-sm dark:border-white/10;
+  }
+
+  /** Sticky nav when scrolled — light frosted / dark frosted */
+  .prsnt-header-scrolled {
+    @apply border-b border-teal-900/10 bg-white/70 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-zinc-950/75;
+  }
+}
+
+/* Landing page entrance — respects prefers-reduced-motion */
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-reveal {
+  animation: landing-fade-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

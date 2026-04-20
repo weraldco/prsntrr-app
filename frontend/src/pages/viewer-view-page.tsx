@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useViewerSocket } from "../hooks/use-viewer-socket";
 import { SlideCanvas } from "../components/slide-canvas";
+import { ThemeToggle } from "../components/theme-toggle";
 import { eventTargetIsEditable } from "../lib/event-target-is-editable";
 import { type ApiSlide, fetchPublicSession } from "../lib/session-api";
 import { useSessionStore } from "../store/session-store";
@@ -140,7 +141,7 @@ export function ViewerViewPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 text-center text-red-400">
+      <div className="flex min-h-screen items-center justify-center bg-prsnt-surface px-4 text-center text-red-600">
         {error}
       </div>
     );
@@ -148,25 +149,26 @@ export function ViewerViewPage() {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-500">
+      <div className="flex min-h-screen items-center justify-center bg-prsnt-surface text-prsnt-ink/55">
         Joining…
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-black pb-[max(1.5rem,env(safe-area-inset-bottom))] text-zinc-100">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 bg-zinc-950 px-3 py-2 text-sm sm:gap-3 sm:px-4 sm:py-3">
-        <p className="min-w-0 flex-1 truncate font-medium text-white">{title}</p>
+    <div className="relative min-h-screen bg-prsnt-surface pb-[max(1.5rem,env(safe-area-inset-bottom))] font-sans text-prsnt-ink">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-900/10 bg-white/90 px-3 py-2 text-sm shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-zinc-900/90 sm:gap-3 sm:px-4 sm:py-3">
+        <p className="min-w-0 flex-1 truncate font-semibold text-prsnt-ink">{title}</p>
         <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle compact />
           {hasControl ? (
-            <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
               You’re controlling
             </span>
           ) : null}
           <span
-            className={`rounded-full px-2 py-0.5 text-xs ${
-              connected ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-200"
+            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+              connected ? "bg-teal-100 text-prsnt-primary" : "bg-amber-100 text-amber-800"
             }`}
           >
             {connected ? "Live" : "Reconnecting…"}
@@ -175,20 +177,20 @@ export function ViewerViewPage() {
       </div>
 
       {status === "ended" ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/85 px-6 text-center">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-prsnt-ink/80 px-6 text-center backdrop-blur-sm">
           <div>
             <p className="text-xl font-semibold text-white">Session ended</p>
-            <p className="mt-2 text-sm text-zinc-400">You can close this page.</p>
+            <p className="mt-2 text-sm text-white/75">You can close this page.</p>
           </div>
         </div>
       ) : null}
 
       <div className="flex min-h-[calc(100dvh-52px)] flex-col items-center justify-center px-2 py-4 sm:px-3 sm:py-6">
-        <div className="aspect-video w-full max-w-5xl min-w-0 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 sm:rounded-xl">
+        <div className="aspect-video w-full max-w-5xl min-w-0 overflow-hidden rounded-lg border border-teal-900/20 bg-zinc-950 sm:rounded-xl">
           {activeSlide ? (
             <SlideCanvas content={activeSlide.content} />
           ) : (
-            <div className="flex h-full min-h-[240px] items-center justify-center text-zinc-500">
+            <div className="flex h-full min-h-[240px] items-center justify-center text-zinc-400">
               Waiting for slides…
             </div>
           )}
@@ -198,18 +200,18 @@ export function ViewerViewPage() {
           <div className="mt-4 flex w-full max-w-md flex-wrap items-center justify-center gap-2 px-2 sm:gap-3">
             <button
               type="button"
-              className="min-h-11 min-w-11 flex-1 rounded-xl border border-amber-700/50 bg-amber-950/40 px-4 py-3 text-sm font-medium text-amber-100 hover:bg-amber-950/70 disabled:opacity-40 sm:flex-none sm:px-5 sm:py-2"
+              className="min-h-11 min-w-11 flex-1 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-100 disabled:opacity-40 sm:flex-none sm:px-5 sm:py-2"
               disabled={totalSlides === 0}
               onClick={() => go(-1)}
             >
               Previous
             </button>
-            <span className="flex min-h-11 min-w-[4.5rem] items-center justify-center text-sm tabular-nums text-zinc-400">
+            <span className="flex min-h-11 min-w-[4.5rem] items-center justify-center text-sm tabular-nums text-prsnt-ink/55">
               {totalSlides > 0 ? currentSlide + 1 : 0} / {totalSlides}
             </span>
             <button
               type="button"
-              className="min-h-11 min-w-11 flex-1 rounded-xl border border-amber-700/50 bg-amber-950/40 px-4 py-3 text-sm font-medium text-amber-100 hover:bg-amber-950/70 disabled:opacity-40 sm:flex-none sm:px-5 sm:py-2"
+              className="min-h-11 min-w-11 flex-1 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-100 disabled:opacity-40 sm:flex-none sm:px-5 sm:py-2"
               disabled={totalSlides === 0}
               onClick={() => go(1)}
             >
@@ -219,7 +221,7 @@ export function ViewerViewPage() {
         ) : null}
       </div>
 
-      <div className="pb-2 text-center text-xs text-zinc-500 sm:pb-6">
+      <div className="pb-2 text-center text-xs text-prsnt-ink/45 sm:pb-6">
         Slide {totalSlides > 0 ? currentSlide + 1 : 0} / {totalSlides}
       </div>
     </div>

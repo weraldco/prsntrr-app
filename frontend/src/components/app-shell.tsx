@@ -1,9 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useHeaderScrolled } from "../hooks/use-header-scrolled";
+import { ThemeToggle } from "./theme-toggle";
 import { logoutRequest, useAuthStore } from "../store/auth-store";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  const headerScrolled = useHeaderScrolled();
 
   async function handleLogout() {
     await logoutRequest();
@@ -11,44 +14,53 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
-          <Link to="/" className="text-lg font-semibold tracking-tight text-white">
+    <div className="min-h-screen bg-prsnt-surface font-sans text-prsnt-ink">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-200 ${
+          headerScrolled ? "prsnt-header-scrolled" : "border-b border-transparent bg-transparent"
+        }`}
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-6">
+          <Link
+            to="/"
+            className="font-logo text-xl font-semibold tracking-wide text-prsnt-ink transition-colors hover:text-prsnt-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-prsnt-cta focus-visible:ring-offset-2 focus-visible:ring-offset-prsnt-surface rounded-lg"
+          >
             prsntrr
           </Link>
-          <nav className="flex items-center gap-3 text-sm">
+          <nav className="flex flex-wrap items-center gap-3 text-sm">
             {user ? (
               <>
-                <Link className="text-zinc-300 hover:text-white" to="/dashboard">
+                <Link className="font-medium text-prsnt-ink/75 transition-colors hover:text-prsnt-primary" to="/dashboard">
                   Dashboard
                 </Link>
-                <span className="text-zinc-500">{user.email}</span>
+                <span className="max-w-[12rem] truncate text-prsnt-ink/50">{user.email}</span>
                 <button
                   type="button"
                   onClick={() => void handleLogout()}
-                  className="rounded-lg border border-zinc-700 px-3 py-1.5 text-zinc-200 hover:bg-zinc-800"
+                  className="rounded-xl border border-teal-900/15 bg-white px-3 py-1.5 text-sm font-medium text-prsnt-ink transition-colors hover:bg-white/90 dark:border-white/10 dark:bg-zinc-800/90 dark:hover:bg-zinc-800"
                 >
                   Log out
                 </button>
+                <ThemeToggle compact />
               </>
             ) : (
               <>
-                <Link className="text-zinc-300 hover:text-white" to="/login">
-                  Log in
-                </Link>
                 <Link
-                  className="rounded-lg bg-indigo-500 px-3 py-1.5 font-medium text-white hover:bg-indigo-400"
-                  to="/register"
+                  to="/login"
+                  className="prsnt-btn-secondary px-3 py-1.5 text-xs sm:text-sm"
                 >
+                  Sign in
+                </Link>
+                <Link className="prsnt-btn-primary px-3 py-1.5 text-xs sm:text-sm" to="/register">
                   Sign up
                 </Link>
+                <ThemeToggle compact />
               </>
             )}
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 pb-8 pt-24 md:px-6">{children}</main>
     </div>
   );
 }

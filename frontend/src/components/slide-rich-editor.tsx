@@ -62,7 +62,7 @@ export function SlideRichEditor({ sessionId, order, initialHtml }: Props) {
     editorProps: {
       attributes: {
         class:
-          "min-h-[120px] px-2 py-2 outline-none prose-invert [&_p]:mb-2 [&_h1]:text-xl [&_h2]:text-lg [&_h3]:text-base",
+          "min-h-[120px] px-2 py-2 font-sans text-prsnt-ink outline-none [&_p]:mb-2 [&_h1]:font-serif [&_h1]:text-xl [&_h2]:font-serif [&_h2]:text-lg [&_h3]:font-serif [&_h3]:text-base",
         "aria-label": "Slide text content",
       },
     },
@@ -98,15 +98,15 @@ export function SlideRichEditor({ sessionId, order, initialHtml }: Props) {
   }, []);
 
   if (!editor) {
-    return <div className="min-h-[140px] animate-pulse rounded-lg bg-zinc-800/80" />;
+    return <div className="min-h-[140px] animate-pulse rounded-lg bg-teal-900/10" />;
   }
 
   return (
-    <div className="rounded-lg border border-zinc-700 bg-zinc-950 focus-within:ring-1 focus-within:ring-indigo-500/40">
-      <div className="flex flex-wrap gap-2 border-b border-zinc-800 px-2 py-1.5">
+    <div className="rounded-xl border border-teal-900/15 bg-white focus-within:ring-2 focus-within:ring-prsnt-cta/25 dark:border-white/10 dark:bg-zinc-900/70">
+      <div className="flex flex-wrap gap-2 border-b border-teal-900/10 bg-prsnt-surface/40 px-2 py-1.5 dark:border-white/10 dark:bg-zinc-900/40">
         <button
           type="button"
-          className="rounded px-2 py-0.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+          className="rounded-lg px-2 py-0.5 text-xs text-prsnt-ink/65 transition-colors hover:bg-teal-900/5 hover:text-prsnt-ink"
           onClick={() => {
             const url = window.prompt("Paste a YouTube link");
             if (!url?.trim()) {
@@ -119,7 +119,7 @@ export function SlideRichEditor({ sessionId, order, initialHtml }: Props) {
         </button>
         <button
           type="button"
-          className="rounded px-2 py-0.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+          className="rounded-lg px-2 py-0.5 text-xs text-prsnt-ink/65 transition-colors hover:bg-teal-900/5 hover:text-prsnt-ink"
           onClick={() => {
             const url = window.prompt("Paste a Vimeo link (e.g. https://vimeo.com/123456)");
             if (!url?.trim()) {
@@ -138,7 +138,7 @@ export function SlideRichEditor({ sessionId, order, initialHtml }: Props) {
       </div>
       <EditorContent editor={editor} />
       {saveError ? (
-        <p className="border-t border-zinc-800 px-2 py-1.5 text-xs text-red-400" role="alert">
+        <p className="border-t border-teal-900/10 px-2 py-1.5 text-xs text-red-600 dark:border-white/10 dark:text-red-400" role="alert">
           {saveError}
         </p>
       ) : null}

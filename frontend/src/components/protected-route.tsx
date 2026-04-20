@@ -9,7 +9,7 @@ export function ProtectedRoute({ children }: Props) {
   const location = useLocation();
 
   if (!initialized) {
-    return <div className="min-h-screen bg-zinc-950" />;
+    return <div className="min-h-screen bg-prsnt-surface" />;
   }
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;

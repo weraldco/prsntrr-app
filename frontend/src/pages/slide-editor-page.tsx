@@ -60,12 +60,12 @@ function SortableSlideCard({
     <li
       ref={setNodeRef}
       style={style}
-      className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40 shadow-sm"
+      className="prsnt-card overflow-hidden p-0 shadow-md"
     >
-      <div className="flex gap-2 border-b border-zinc-800/80 bg-zinc-950/50 px-2 py-1.5">
+      <div className="flex gap-2 border-b border-teal-900/10 bg-prsnt-surface/50 px-2 py-1.5">
         <button
           type="button"
-          className="flex h-9 w-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 active:cursor-grabbing"
+          className="flex h-9 w-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg text-prsnt-ink/45 transition-colors hover:bg-teal-900/5 hover:text-prsnt-ink active:cursor-grabbing"
           aria-label="Drag to reorder"
           {...attributes}
           {...listeners}
@@ -73,15 +73,15 @@ function SortableSlideCard({
           <span className="text-lg leading-none">⋮⋮</span>
         </button>
         <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-          <span className="truncate text-xs font-medium text-zinc-500">
+          <span className="truncate text-xs font-medium text-prsnt-ink/55">
             Slide {displayIndex}
-            <span className="ml-2 text-zinc-600">
+            <span className="ml-2 text-prsnt-ink/40">
               {slide.content.type === "image" ? "Image" : "Rich text"}
             </span>
           </span>
           <button
             type="button"
-            className="shrink-0 text-xs text-red-400 hover:text-red-300"
+            className="shrink-0 text-xs font-medium text-red-600 hover:text-red-700"
             aria-label={`Remove slide ${displayIndex}`}
             onClick={() => void onDelete(slide.order)}
           >
@@ -103,8 +103,8 @@ function SortableSlideCard({
         )}
       </div>
       {slide.content.type === "html" ? (
-        <div className="border-t border-zinc-800 p-3">
-          <p className="mb-2 text-xs font-medium text-zinc-500">Edit content</p>
+        <div className="border-t border-teal-900/10 bg-white/50 p-3 dark:border-white/10 dark:bg-zinc-900/40">
+          <p className="mb-2 text-xs font-medium text-prsnt-ink/55">Edit content</p>
           <SlideRichEditor sessionId={sessionId} order={slide.order} initialHtml={slide.content.html} />
         </div>
       ) : null}
@@ -288,10 +288,10 @@ export function SlideEditorPage() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-white">{session?.title ?? "Session"}</h1>
+            <h1 className="text-2xl font-semibold">{session?.title ?? "Session"}</h1>
             {session ? (
-              <p className="text-sm text-zinc-400">
-                Code <span className="font-mono text-zinc-200">{session.code}</span> ·{" "}
+              <p className="text-sm text-prsnt-ink/65">
+                Code <span className="font-mono text-prsnt-ink/85">{session.code}</span> ·{" "}
                 {session.totalSlides} slides
               </p>
             ) : null}
@@ -300,17 +300,17 @@ export function SlideEditorPage() {
             <button
               type="button"
               disabled={addingText}
-              className="rounded-lg border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-800 disabled:opacity-50"
+              className="prsnt-btn-ghost disabled:opacity-50"
               onClick={() => void onAddTextSlide()}
             >
               {addingText ? "Adding…" : "Add text slide"}
             </button>
-            <label className="cursor-pointer rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400">
+            <label className="prsnt-btn-primary cursor-pointer">
               {uploading ? "Uploading…" : "Upload image"}
               <input type="file" accept="image/*" className="hidden" onChange={(e) => void onFile(e)} />
             </label>
             <label
-              className={`cursor-pointer rounded-lg border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-800 ${
+              className={`prsnt-btn-ghost cursor-pointer ${
                 deckImportStatus || uploading || addingText ? "pointer-events-none opacity-50" : ""
               }`}
             >
@@ -324,7 +324,7 @@ export function SlideEditorPage() {
               />
             </label>
             <Link
-              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-900"
+              className="inline-flex items-center justify-center rounded-xl bg-prsnt-cta px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-sky-800"
               to={`/sessions/${id}/present`}
             >
               Present
@@ -332,12 +332,12 @@ export function SlideEditorPage() {
           </div>
         </div>
         {error ? (
-          <p className="text-sm text-red-400" role="alert">
+          <p className="text-sm text-red-600" role="alert">
             {error}
           </p>
         ) : null}
         {sortedSlides.length === 0 ? (
-          <p className="text-zinc-500">Add a text slide or upload an image to present.</p>
+          <p className="text-prsnt-ink/55">Add a text slide or upload an image to present.</p>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={sortedSlides.map((s) => s.id)} strategy={verticalListSortingStrategy}>

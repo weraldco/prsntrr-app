@@ -10,6 +10,7 @@ import {
   updateSession,
 } from "../lib/session-api";
 import { SlideCanvas } from "../components/slide-canvas";
+import { ThemeToggle } from "../components/theme-toggle";
 import { eventTargetIsEditable } from "../lib/event-target-is-editable";
 import { useSessionStore } from "../store/session-store";
 
@@ -178,9 +179,9 @@ export function PresenterViewPage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-zinc-950 px-4 py-8 text-red-400">
+      <div className="min-h-screen bg-prsnt-surface px-4 py-8 text-red-600">
         {loadError}{" "}
-        <Link className="text-indigo-400" to="/dashboard">
+        <Link className="prsnt-link" to="/dashboard">
           Back
         </Link>
       </div>
@@ -188,36 +189,44 @@ export function PresenterViewPage() {
   }
 
   if (!session) {
-    return <div className="min-h-screen bg-zinc-950 px-4 py-8 text-zinc-500">Loading…</div>;
+    return (
+      <div className="min-h-screen bg-prsnt-surface px-4 py-8 text-prsnt-ink/55">Loading…</div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100">
-      <div className="flex items-center justify-between gap-4 border-b border-zinc-800 bg-zinc-950 px-4 py-3 text-sm">
+    <div className="min-h-screen bg-prsnt-surface font-sans text-prsnt-ink">
+      <div className="flex items-center justify-between gap-4 border-b border-teal-900/10 bg-white/90 px-4 py-3 text-sm shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-zinc-900/90">
         <div className="flex flex-wrap items-center gap-3">
-          <Link className="text-zinc-400 hover:text-white" to={`/sessions/${session.id}/edit`}>
+          <Link
+            className="font-medium text-prsnt-cta transition-colors hover:text-prsnt-primary"
+            to={`/sessions/${session.id}/edit`}
+          >
             ← Editor
           </Link>
-          <span className="font-mono text-xs text-zinc-500">{session.code}</span>
+          <span className="font-mono text-xs text-prsnt-ink/50">{session.code}</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-xs ${
-              connected ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-200"
+            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+              connected
+                ? "bg-teal-100 text-prsnt-primary"
+                : "bg-amber-100 text-amber-800"
             }`}
           >
             {connected ? "Live socket" : "Connecting…"}
           </span>
-          <span className="text-zinc-500">
+          <span className="text-prsnt-ink/55">
             Viewers: {viewers.length} {status === "live" ? "· LIVE" : ""}
             {controlGrantedTo ? (
-              <span className="ml-2 text-amber-200/90">· Guest control</span>
+              <span className="ml-2 font-medium text-amber-800">· Guest control</span>
             ) : null}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <ThemeToggle compact />
           {status === "live" ? (
             <button
               type="button"
-              className="rounded-lg border border-red-900/60 bg-red-950/40 px-3 py-1.5 text-xs font-medium text-red-200 hover:bg-red-950/70"
+              className="rounded-xl border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100"
               onClick={() => endSession()}
             >
               End session
@@ -225,7 +234,7 @@ export function PresenterViewPage() {
           ) : (
             <button
               type="button"
-              className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-black hover:bg-emerald-400"
+              className="rounded-xl bg-prsnt-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-teal-800"
               onClick={() => void goLive()}
             >
               Go live
@@ -233,8 +242,10 @@ export function PresenterViewPage() {
           )}
           <button
             type="button"
-            className={`rounded-lg border px-3 py-1.5 text-xs hover:bg-zinc-900 ${
-              showViewers ? "border-indigo-500 text-indigo-200" : "border-zinc-700 text-zinc-200"
+            className={`rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors ${
+              showViewers
+                ? "border-prsnt-cta bg-sky-50 text-prsnt-cta"
+                : "border-teal-900/15 bg-white text-prsnt-ink hover:bg-prsnt-surface dark:border-white/10 dark:bg-zinc-800/80 dark:hover:bg-zinc-800"
             }`}
             onClick={() => setShowViewers((v) => !v)}
           >
@@ -242,7 +253,7 @@ export function PresenterViewPage() {
           </button>
           <button
             type="button"
-            className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-900"
+            className="rounded-xl border border-teal-900/15 bg-white px-3 py-1.5 text-xs font-medium text-prsnt-ink transition-colors hover:bg-prsnt-surface dark:border-white/10 dark:bg-zinc-800/80 dark:hover:bg-zinc-800"
             onClick={() => setShowQr((v) => !v)}
           >
             QR / link
@@ -251,29 +262,29 @@ export function PresenterViewPage() {
       </div>
 
       {liveError ? (
-        <div className="bg-red-950 px-4 py-2 text-center text-sm text-red-200">{liveError}</div>
+        <div className="bg-red-50 px-4 py-2 text-center text-sm font-medium text-red-700">{liveError}</div>
       ) : null}
 
       {showViewers ? (
-        <div className="border-b border-zinc-800 bg-zinc-900/90 px-4 py-3">
+        <div className="border-b border-teal-900/10 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-zinc-900/85">
           <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Viewer list</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-prsnt-ink/45">Viewer list</p>
               {controlGrantedTo ? (
-                <p className="mt-1 text-sm text-amber-200">
+                <p className="mt-1 text-sm text-amber-900">
                   Slides driven by{" "}
-                  <span className="rounded bg-amber-500/15 px-1.5 py-0.5 font-mono text-xs">
+                  <span className="rounded-lg bg-amber-100 px-1.5 py-0.5 font-mono text-xs text-amber-950">
                     {shortSocketLabel(controlGrantedTo)}
                   </span>
                 </p>
               ) : (
-                <p className="mt-1 text-sm text-zinc-400">Only you can change slides.</p>
+                <p className="mt-1 text-sm text-prsnt-ink/60">Only you can change slides.</p>
               )}
             </div>
             {controlGrantedTo ? (
               <button
                 type="button"
-                className="shrink-0 rounded-lg border border-amber-700/60 px-3 py-1.5 text-xs text-amber-100 hover:bg-amber-950/50"
+                className="shrink-0 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 transition-colors hover:bg-amber-100"
                 onClick={() => socketRef.current?.emit("control:revoke", { sessionId: session.id })}
               >
                 Revoke guest control
@@ -281,22 +292,22 @@ export function PresenterViewPage() {
             ) : null}
           </div>
           {viewers.length === 0 ? (
-            <p className="mx-auto mt-3 max-w-5xl text-sm text-zinc-500">No viewers connected yet.</p>
+            <p className="mx-auto mt-3 max-w-5xl text-sm text-prsnt-ink/55">No viewers connected yet.</p>
           ) : (
-            <ul className="mx-auto mt-3 max-w-5xl divide-y divide-zinc-800 rounded-lg border border-zinc-800">
+            <ul className="mx-auto mt-3 max-w-5xl divide-y divide-teal-900/10 rounded-xl border border-teal-900/10 bg-white/90 dark:divide-white/10 dark:border-white/10 dark:bg-zinc-900/70">
               {viewers.map((v) => (
                 <li
                   key={v.socketId}
                   className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm"
                 >
-                  <span className="font-mono text-xs text-zinc-300">{shortSocketLabel(v.socketId)}</span>
+                  <span className="font-mono text-xs text-prsnt-ink/70">{shortSocketLabel(v.socketId)}</span>
                   <div className="flex items-center gap-2">
                     {controlGrantedTo === v.socketId ? (
-                      <span className="text-xs text-amber-300">Controlling slides</span>
+                      <span className="text-xs font-medium text-amber-800">Controlling slides</span>
                     ) : (
                       <button
                         type="button"
-                        className="rounded-md bg-zinc-800 px-2 py-1 text-xs text-zinc-100 hover:bg-zinc-700"
+                        className="rounded-lg bg-prsnt-surface px-2 py-1 text-xs font-medium text-prsnt-ink ring-1 ring-teal-900/15 transition-colors hover:bg-teal-50"
                         onClick={() =>
                           socketRef.current?.emit("control:grant", {
                             sessionId: session.id,
@@ -316,33 +327,33 @@ export function PresenterViewPage() {
       ) : null}
 
       {status === "ended" ? (
-        <div className="bg-zinc-900 px-4 py-3 text-center text-sm text-zinc-400">
-          Session ended — use <span className="font-medium text-zinc-300">Go live</span> in the header when you’re ready again.
+        <div className="border-b border-teal-900/10 bg-prsnt-surface px-4 py-3 text-center text-sm text-prsnt-ink/65">
+          Session ended — use <span className="font-semibold text-prsnt-ink">Go live</span> in the header when you’re ready again.
         </div>
       ) : null}
 
       <div className="flex min-h-[calc(100vh-52px)] flex-col items-center justify-center px-4 py-6">
         {status !== "live" ? (
-          <div className="mb-4 w-full max-w-5xl rounded-xl border border-amber-700/40 bg-amber-950/35 px-4 py-4 text-center sm:py-5">
-            <p className="text-sm font-medium text-amber-100">
+          <div className="mb-4 w-full max-w-5xl rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-4 text-center shadow-sm sm:py-5">
+            <p className="text-sm font-medium text-amber-950">
               {status === "ended"
                 ? "Session is ended. Press Go live in the header to start presenting again."
                 : "You’re not live yet — viewers need a live session to follow your slides."}
             </p>
             <button
               type="button"
-              className="mt-3 rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-black hover:bg-emerald-400"
+              className="mt-3 rounded-xl bg-prsnt-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-teal-800"
               onClick={() => void goLive()}
             >
               Go live
             </button>
           </div>
         ) : null}
-        <div className="aspect-video w-full max-w-5xl overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+        <div className="aspect-video w-full max-w-5xl overflow-hidden rounded-xl border border-teal-900/20 bg-zinc-950 shadow-xl">
           {activeSlide ? (
             <SlideCanvas content={activeSlide.content} />
           ) : (
-            <div className="flex h-full min-h-[320px] items-center justify-center text-zinc-500">
+            <div className="flex h-full min-h-[320px] items-center justify-center text-zinc-400">
               Add slides in the editor to start presenting.
             </div>
           )}
@@ -350,18 +361,18 @@ export function PresenterViewPage() {
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <button
             type="button"
-            className="rounded-xl border border-zinc-700 px-5 py-2 text-sm hover:bg-zinc-900 disabled:opacity-40"
+            className="rounded-xl border border-teal-900/20 bg-white px-5 py-2 text-sm font-medium text-prsnt-ink shadow-sm transition-colors hover:bg-prsnt-surface disabled:opacity-40 dark:border-white/10 dark:bg-zinc-800/90 dark:hover:bg-zinc-800"
             disabled={totalSlides === 0}
             onClick={() => void go(-1)}
           >
             Previous
           </button>
-          <span className="text-sm text-zinc-400">
+          <span className="text-sm tabular-nums text-prsnt-ink/55">
             {totalSlides > 0 ? currentSlide + 1 : 0} / {totalSlides}
           </span>
           <button
             type="button"
-            className="rounded-xl border border-zinc-700 px-5 py-2 text-sm hover:bg-zinc-900 disabled:opacity-40"
+            className="rounded-xl border border-teal-900/20 bg-white px-5 py-2 text-sm font-medium text-prsnt-ink shadow-sm transition-colors hover:bg-prsnt-surface disabled:opacity-40 dark:border-white/10 dark:bg-zinc-800/90 dark:hover:bg-zinc-800"
             disabled={totalSlides === 0}
             onClick={() => void go(1)}
           >
@@ -372,7 +383,7 @@ export function PresenterViewPage() {
 
       {showQr ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-prsnt-ink/40 px-4 backdrop-blur-sm"
           role="presentation"
           onClick={() => setShowQr(false)}
         >
@@ -380,25 +391,25 @@ export function PresenterViewPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={qrTitleId}
-            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-center shadow-xl"
+            className="w-full max-w-sm rounded-2xl border border-teal-900/10 bg-white p-6 text-center shadow-xl dark:border-white/10 dark:bg-zinc-900"
             onClick={(e) => e.stopPropagation()}
           >
-            <p id={qrTitleId} className="text-sm font-medium text-white">
+            <p id={qrTitleId} className="text-sm font-semibold text-prsnt-ink">
               Viewer link
             </p>
-            <p className="mt-2 break-all font-mono text-xs text-zinc-400">{viewerUrl}</p>
+            <p className="mt-2 break-all font-mono text-xs text-prsnt-ink/60">{viewerUrl}</p>
             <div className="mt-4 flex justify-center">
               <QRCodeSVG value={viewerUrl} size={200} level="M" />
             </div>
             {copyHint ? (
-              <p className="mt-2 text-xs text-zinc-400" role="status">
+              <p className="mt-2 text-xs text-prsnt-ink/55" role="status">
                 {copyHint}
               </p>
             ) : null}
             <button
               ref={copyButtonRef}
               type="button"
-              className="mt-4 w-full rounded-lg bg-zinc-800 py-2 text-sm text-zinc-100 hover:bg-zinc-700"
+              className="mt-4 w-full rounded-xl bg-prsnt-primary py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800"
               onClick={() =>
                 void (async () => {
                   try {
@@ -414,7 +425,7 @@ export function PresenterViewPage() {
             </button>
             <button
               type="button"
-              className="mt-2 w-full rounded-lg border border-zinc-700 py-2 text-sm text-zinc-300 hover:bg-zinc-900"
+              className="mt-2 w-full rounded-xl border border-teal-900/15 py-2.5 text-sm font-medium text-prsnt-ink transition-colors hover:bg-prsnt-surface dark:border-white/10 dark:hover:bg-zinc-800"
               onClick={() => setShowQr(false)}
             >
               Close

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { GuestOnlyRoute } from "./components/guest-only-route";
 import { ProtectedRoute } from "./components/protected-route";
 import { useAuthStore } from "./store/auth-store";
 import { CreateSessionPage } from "./pages/create-session-page";
@@ -23,9 +24,30 @@ export default function App() {
     <BrowserRouter>
       <AuthBootstrap />
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/"
+          element={
+            <GuestOnlyRoute>
+              <LandingPage />
+            </GuestOnlyRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <GuestOnlyRoute>
+              <LoginPage />
+            </GuestOnlyRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <GuestOnlyRoute>
+              <RegisterPage />
+            </GuestOnlyRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={

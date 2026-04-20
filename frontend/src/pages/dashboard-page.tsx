@@ -36,31 +36,25 @@ export function DashboardPage() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-white">Your sessions</h1>
-            <p className="text-sm text-zinc-400">Create, edit slides, then present live.</p>
+            <h1 className="text-2xl font-semibold">Your sessions</h1>
+            <p className="text-sm text-prsnt-ink/65">Create, edit slides, then present live.</p>
           </div>
-          <Link
-            to="/sessions/new"
-            className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400"
-          >
+          <Link to="/sessions/new" className="prsnt-btn-primary">
             New session
           </Link>
         </div>
-        {loading ? <p className="text-zinc-500">Loading…</p> : null}
-        {error ? <p className="text-sm text-red-400">{error}</p> : null}
+        {loading ? <p className="text-prsnt-ink/50">Loading…</p> : null}
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
         {!loading && sessions.length === 0 ? (
-          <p className="text-zinc-500">No sessions yet. Create one to get started.</p>
+          <p className="text-prsnt-ink/55">No sessions yet. Create one to get started.</p>
         ) : null}
         <ul className="space-y-3">
           {sessions.map((s) => (
-            <li
-              key={s.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3"
-            >
+            <li key={s.id} className="prsnt-card flex flex-wrap items-center justify-between gap-3 px-4 py-4">
               <div>
-                <p className="font-medium text-white">{s.title}</p>
-                <p className="text-xs text-zinc-500">
-                  Code <span className="font-mono text-zinc-300">{s.code}</span> · {s.status} ·{" "}
+                <p className="font-semibold text-prsnt-ink">{s.title}</p>
+                <p className="text-xs text-prsnt-ink/55">
+                  Code <span className="font-mono text-prsnt-ink/80">{s.code}</span> · {s.status} ·{" "}
                   {s.totalSlides} slides
                   {typeof s.peakViewerCount === "number" && s.peakViewerCount > 0 ? (
                     <> · Peak viewers {s.peakViewerCount}</>
@@ -68,14 +62,11 @@ export function DashboardPage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 text-sm">
-                <Link
-                  className="rounded-lg border border-zinc-700 px-3 py-1.5 text-zinc-200 hover:bg-zinc-800"
-                  to={`/sessions/${s.id}/edit`}
-                >
+                <Link className="prsnt-btn-ghost px-3 py-1.5 text-xs sm:text-sm" to={`/sessions/${s.id}/edit`}>
                   Edit slides
                 </Link>
                 <Link
-                  className="rounded-lg bg-zinc-100 px-3 py-1.5 font-medium text-zinc-900 hover:bg-white"
+                  className="rounded-xl bg-prsnt-cta px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-sky-800 sm:text-sm"
                   to={`/sessions/${s.id}/present`}
                 >
                   Present
