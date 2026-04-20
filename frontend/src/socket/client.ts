@@ -1,4 +1,5 @@
 import { io, type Socket } from "socket.io-client";
+import { apiOrigin } from "../lib/api-origin";
 
 const defaultOptions = {
   path: "/socket.io",
@@ -12,5 +13,9 @@ const defaultOptions = {
 
 /** Socket.io client with app defaults (presenter still passes Supabase token on `join:session`). */
 export function createSocket(extra?: Partial<Parameters<typeof io>[1]>): Socket {
+  const origin = apiOrigin();
+  if (origin) {
+    return io(origin, { ...defaultOptions, ...extra });
+  }
   return io({ ...defaultOptions, ...extra });
 }

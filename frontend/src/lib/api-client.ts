@@ -1,3 +1,5 @@
+import { apiUrl } from "./api-origin";
+
 let getAccessToken: () => string | null = () => null;
 
 export function bindAccessToken(fn: () => string | null) {
@@ -5,6 +7,7 @@ export function bindAccessToken(fn: () => string | null) {
 }
 
 export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
+  const url = apiUrl(input);
   const headers = new Headers(init.headers);
   const token = getAccessToken();
   if (token) {
@@ -13,7 +16,7 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
   if (!headers.has("Content-Type") && init.body && !(init.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
-  return fetch(input, {
+  return fetch(url, {
     ...init,
     credentials: "include",
     headers,

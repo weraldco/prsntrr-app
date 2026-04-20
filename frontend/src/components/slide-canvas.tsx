@@ -1,3 +1,4 @@
+import { apiUrl } from "../lib/api-origin";
 import type { ApiSlideContent } from "../lib/session-api";
 import { purifySlideHtml } from "../lib/purify-slide-html";
 
@@ -7,7 +8,7 @@ type Props = {
 
 export function SlideCanvas({ content }: Props) {
   if (content.type === "image") {
-    return <img src={content.src} alt="" className="h-full w-full object-contain" />;
+    return <img src={apiUrl(content.src)} alt="" className="h-full w-full object-contain" />;
   }
 
   return (

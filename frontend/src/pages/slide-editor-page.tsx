@@ -18,6 +18,7 @@ import { Link, useParams } from "react-router-dom";
 import { AppShell } from "../components/app-shell";
 import { SlideCanvas } from "../components/slide-canvas";
 import { SlideRichEditor } from "../components/slide-rich-editor";
+import { apiUrl } from "../lib/api-origin";
 import {
   importSlidesFromImageFiles,
   pdfFileToImageFiles,
@@ -91,7 +92,7 @@ function SortableSlideCard({
       <div className="aspect-video w-full bg-black">
         {slide.content.type === "image" ? (
           slide.content.src ? (
-            <img src={slide.content.src} alt="" className="h-full w-full object-contain" />
+            <img src={apiUrl(slide.content.src)} alt="" className="h-full w-full object-contain" />
           ) : null
         ) : (
           <div className="h-full w-full overflow-hidden">
