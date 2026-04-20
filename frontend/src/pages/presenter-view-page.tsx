@@ -9,6 +9,7 @@ import {
   fetchSlides,
   updateSession,
 } from "../lib/session-api";
+import { PresenterDeckNav } from "../components/presenter-deck-nav";
 import { SlideCanvas } from "../components/slide-canvas";
 import { ThemeToggle } from "../components/theme-toggle";
 import { eventTargetIsEditable } from "../lib/event-target-is-editable";
@@ -23,6 +24,7 @@ export function PresenterViewPage() {
   const [copyHint, setCopyHint] = useState<string | null>(null);
   const qrTitleId = useId();
   const copyButtonRef = useRef<HTMLButtonElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
 
   const currentSlide = useSessionStore((s) => s.currentSlide);
   const totalSlides = useSessionStore((s) => s.totalSlides);
@@ -32,6 +34,23 @@ export function PresenterViewPage() {
   const liveError = useSessionStore((s) => s.error);
   const status = useSessionStore((s) => s.status);
   const [showViewers, setShowViewers] = useState(false);
+  const [blackout, setBlackout] = useState(false);
+
+  const toggleFullscreen = useCallback(async () => {
+    const el = stageRef.current;
+    if (!el) {
+      return;
+    }
+    try {
+      if (!document.fullscreenElement) {
+        await el.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      /* user gesture or API unsupported */
+    }
+  }, []);
 
   const loadPresenterData = useCallback(async () => {
     if (!id) {
@@ -110,6 +129,19 @@ export function PresenterViewPage() {
       if (eventTargetIsEditable(e.target)) {
         return;
       }
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+      if (e.key === "b" || e.key === "B") {
+        e.preventDefault();
+        setBlackout((v) => !v);
+        return;
+      }
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        void toggleFullscreen();
+        return;
+      }
       if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
         e.preventDefault();
         go(1);
@@ -121,7 +153,7 @@ export function PresenterViewPage() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [session, showQr]);
+  }, [session, showQr, toggleFullscreen]);
 
   useEffect(() => {
     if (!showQr) {
@@ -332,7 +364,7 @@ export function PresenterViewPage() {
         </div>
       ) : null}
 
-      <div className="flex min-h-[calc(100vh-52px)] flex-col items-center justify-center px-4 py-6">
+      <div className="flex min-h-[calc(100vh-52px)] flex-col items-center justify-center px-4 py-6 pb-28">
         {status !== "live" ? (
           <div className="mb-4 w-full max-w-5xl rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-4 text-center shadow-sm sm:py-5">
             <p className="text-sm font-medium text-amber-950">
@@ -349,7 +381,10 @@ export function PresenterViewPage() {
             </button>
           </div>
         ) : null}
-        <div className="aspect-video w-full max-w-5xl overflow-hidden rounded-xl border border-teal-900/20 bg-zinc-950 shadow-xl">
+        <div
+          ref={stageRef}
+          className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-xl border border-teal-900/20 bg-zinc-950 shadow-xl"
+        >
           {activeSlide ? (
             <SlideCanvas content={activeSlide.content} />
           ) : (
@@ -357,29 +392,24 @@ export function PresenterViewPage() {
               Add slides in the editor to start presenting.
             </div>
           )}
-        </div>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            className="rounded-xl border border-teal-900/20 bg-white px-5 py-2 text-sm font-medium text-prsnt-ink shadow-sm transition-colors hover:bg-prsnt-surface disabled:opacity-40 dark:border-white/10 dark:bg-zinc-800/90 dark:hover:bg-zinc-800"
-            disabled={totalSlides === 0}
-            onClick={() => void go(-1)}
-          >
-            Previous
-          </button>
-          <span className="text-sm tabular-nums text-prsnt-ink/55">
-            {totalSlides > 0 ? currentSlide + 1 : 0} / {totalSlides}
-          </span>
-          <button
-            type="button"
-            className="rounded-xl border border-teal-900/20 bg-white px-5 py-2 text-sm font-medium text-prsnt-ink shadow-sm transition-colors hover:bg-prsnt-surface disabled:opacity-40 dark:border-white/10 dark:bg-zinc-800/90 dark:hover:bg-zinc-800"
-            disabled={totalSlides === 0}
-            onClick={() => void go(1)}
-          >
-            Next
-          </button>
+          {blackout ? (
+            <div
+              className="absolute inset-0 z-20 bg-black"
+              aria-hidden
+            />
+          ) : null}
         </div>
       </div>
+
+      <PresenterDeckNav
+        currentIndex={currentSlide}
+        totalSlides={totalSlides}
+        blackout={blackout}
+        onToggleBlackout={() => setBlackout((v) => !v)}
+        onPrev={() => go(-1)}
+        onNext={() => go(1)}
+        disabled={totalSlides === 0}
+      />
 
       {showQr ? (
         <div
