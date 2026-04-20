@@ -16,7 +16,17 @@ const PORT = Number.parseInt(process.env.PORT ?? "3001", 10);
 const uploadDir = path.join(process.cwd(), "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 
-const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
+/** Browsers send Origin without a trailing slash; CORS requires an exact match. */
+function normalizeFrontendOrigin(raw: string | undefined): string {
+  const fallback = "http://localhost:5173";
+  if (!raw || typeof raw !== "string") {
+    return fallback;
+  }
+  const trimmed = raw.trim().replace(/\/+$/, "");
+  return trimmed || fallback;
+}
+
+const frontendUrl = normalizeFrontendOrigin(process.env.FRONTEND_URL);
 
 const app = express();
 app.set("trust proxy", 1);
