@@ -80,6 +80,17 @@ export function useViewerSocket({ sessionCode, enabled, onReconnect }: Options) 
       useSessionStore.getState().setStatus("ended");
     });
 
+    socket.on(
+      "session:sync",
+      (payload: { status: SessionStatus; currentSlide: number; totalSlides: number }) => {
+        useSessionStore.setState({
+          status: payload.status,
+          currentSlide: payload.currentSlide,
+          totalSlides: payload.totalSlides,
+        });
+      },
+    );
+
     return () => {
       socket.disconnect();
       socketRef.current = null;

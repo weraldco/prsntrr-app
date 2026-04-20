@@ -62,6 +62,7 @@ const io = new Server(httpServer, {
 });
 
 async function start() {
+  app.set("io", io);
   await attachRedisAdapterIfConfigured(io);
   registerSocketHandlers(io);
   httpServer.listen(PORT, () => {

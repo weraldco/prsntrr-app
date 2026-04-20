@@ -76,6 +76,10 @@ export function PresenterViewPage() {
     };
   }, [id, loadPresenterData]);
 
+  useEffect(() => {
+    setSession((prev) => (prev && prev.status !== status ? { ...prev, status } : prev));
+  }, [status]);
+
   const orderedSlides = useMemo(() => [...slides].sort((a, b) => a.order - b.order), [slides]);
 
   const activeSlide =
@@ -140,9 +144,13 @@ export function PresenterViewPage() {
     if (!session) {
       return;
     }
-    const updated = await updateSession(session.id, { status: "live" });
-    setSession(updated);
-    useSessionStore.getState().setStatus("live");
+    try {
+      const updated = await updateSession(session.id, { status: "live" });
+      setSession(updated);
+      useSessionStore.getState().setStatus("live");
+    } catch {
+      useSessionStore.getState().setError("Could not go live. Try again.");
+    }
   }
 
   function endSession() {
@@ -199,14 +207,22 @@ export function PresenterViewPage() {
             {connected ? "Live socket" : "Connecting…"}
           </span>
           <span className="text-zinc-500">
-            Viewers: {viewers.length} {session.status === "live" ? "· LIVE" : ""}
+            Viewers: {viewers.length} {status === "live" ? "· LIVE" : ""}
             {controlGrantedTo ? (
               <span className="ml-2 text-amber-200/90">· Guest control</span>
             ) : null}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {session.status !== "live" && status !== "ended" ? (
+          {status === "live" ? (
+            <button
+              type="button"
+              className="rounded-lg border border-red-900/60 bg-red-950/40 px-3 py-1.5 text-xs font-medium text-red-200 hover:bg-red-950/70"
+              onClick={() => endSession()}
+            >
+              End session
+            </button>
+          ) : (
             <button
               type="button"
               className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-black hover:bg-emerald-400"
@@ -214,7 +230,7 @@ export function PresenterViewPage() {
             >
               Go live
             </button>
-          ) : null}
+          )}
           <button
             type="button"
             className={`rounded-lg border px-3 py-1.5 text-xs hover:bg-zinc-900 ${
@@ -230,13 +246,6 @@ export function PresenterViewPage() {
             onClick={() => setShowQr((v) => !v)}
           >
             QR / link
-          </button>
-          <button
-            type="button"
-            className="rounded-lg border border-red-900/60 px-3 py-1.5 text-xs text-red-300 hover:bg-red-950"
-            onClick={() => endSession()}
-          >
-            End session
           </button>
         </div>
       </div>
@@ -306,11 +315,29 @@ export function PresenterViewPage() {
         </div>
       ) : null}
 
-      {status === "ended" || session.status === "ended" ? (
-        <div className="bg-zinc-900 px-4 py-3 text-center text-sm text-zinc-400">Session ended</div>
+      {status === "ended" ? (
+        <div className="bg-zinc-900 px-4 py-3 text-center text-sm text-zinc-400">
+          Session ended — use <span className="font-medium text-zinc-300">Go live</span> in the header when you’re ready again.
+        </div>
       ) : null}
 
       <div className="flex min-h-[calc(100vh-52px)] flex-col items-center justify-center px-4 py-6">
+        {status !== "live" ? (
+          <div className="mb-4 w-full max-w-5xl rounded-xl border border-amber-700/40 bg-amber-950/35 px-4 py-4 text-center sm:py-5">
+            <p className="text-sm font-medium text-amber-100">
+              {status === "ended"
+                ? "Session is ended. Press Go live in the header to start presenting again."
+                : "You’re not live yet — viewers need a live session to follow your slides."}
+            </p>
+            <button
+              type="button"
+              className="mt-3 rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-black hover:bg-emerald-400"
+              onClick={() => void goLive()}
+            >
+              Go live
+            </button>
+          </div>
+        ) : null}
         <div className="aspect-video w-full max-w-5xl overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
           {activeSlide ? (
             <SlideCanvas content={activeSlide.content} />

@@ -78,6 +78,24 @@ export function ViewerViewPage() {
     onReconnect: refetchFromApi,
   });
 
+  /** If we showed "ended" but the presenter went live again via REST, refetch when tab is focused. */
+  useEffect(() => {
+    if (!ready || !code || status !== "ended") {
+      return;
+    }
+    function onVisible() {
+      if (document.visibilityState === "visible") {
+        void refetchFromApi();
+      }
+    }
+    window.addEventListener("focus", refetchFromApi);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", refetchFromApi);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [ready, code, status, refetchFromApi]);
+
   const orderedSlides = useMemo(() => [...slides].sort((a, b) => a.order - b.order), [slides]);
 
   const activeSlide =

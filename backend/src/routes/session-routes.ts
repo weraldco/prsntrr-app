@@ -1,4 +1,5 @@
 import { Router } from "express";
+import type { Server } from "socket.io";
 import { z } from "zod";
 import { getAuth, requireAuth } from "../middleware/auth.js";
 import { validateBody } from "../middleware/validate.js";
@@ -49,6 +50,12 @@ sessionRouter.patch("/:sessionId", validateBody(patchSchema), async (req, res) =
     res.status(404).json({ error: "Session not found" });
     return;
   }
+  const io = req.app.get("io") as Server | undefined;
+  io?.to(`session:${session.id}`).emit("session:sync", {
+    status: session.status,
+    currentSlide: session.currentSlide,
+    totalSlides: session.totalSlides,
+  });
   res.json(session);
 });
 
