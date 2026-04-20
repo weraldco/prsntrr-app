@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+frontend/dist/
+backend/dist/
+*.tsbuildinfo
+
+# Environment (keep .env.example committed)
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# App runtime / uploads (slide images when using local disk)
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Vite / tooling caches
+frontend/node_modules/.vite/
+.turbo/
+
+# Supabase CLI local (if used)
+.supabase/
+
+# Optional: local SSL or secrets
+*.pem
+*.key
+.cursor
