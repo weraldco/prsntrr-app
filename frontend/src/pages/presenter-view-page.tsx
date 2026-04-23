@@ -4,12 +4,17 @@ import { QRCodeSVG } from "qrcode.react";
 import { usePresenterSocket } from "../hooks/use-presenter-socket";
 import {
   type ApiSession,
+  type ApiSessionQuestion,
   type ApiSlide,
   fetchSession,
+  fetchSessionQuestions,
   fetchSlides,
+  patchSessionQuestion,
   updateSession,
 } from "../lib/session-api";
+import { sortPresenterQuestions } from "../lib/sort-session-questions";
 import { PresenterDeckNav } from "../components/presenter-deck-nav";
+import { PresenterQuestionsDrawer } from "../components/presenter-questions-drawer";
 import { SlideCanvas } from "../components/slide-canvas";
 import { ThemeToggle } from "../components/theme-toggle";
 import { eventTargetIsEditable } from "../lib/event-target-is-editable";
@@ -34,6 +39,9 @@ export function PresenterViewPage() {
   const liveError = useSessionStore((s) => s.error);
   const status = useSessionStore((s) => s.status);
   const [showViewers, setShowViewers] = useState(false);
+  const [showQuestions, setShowQuestions] = useState(false);
+  const [questions, setQuestions] = useState<ApiSessionQuestion[]>([]);
+  const [questionsLoading, setQuestionsLoading] = useState(false);
   const [blackout, setBlackout] = useState(false);
 
   const toggleFullscreen = useCallback(async () => {
@@ -69,12 +77,47 @@ export function PresenterViewPage() {
     });
   }, [id]);
 
+  const applyQuestionFromSocket = useCallback((q: ApiSessionQuestion) => {
+    setQuestions((prev) => sortPresenterQuestions([...prev.filter((x) => x.id !== q.id), q]));
+  }, []);
+
+  const refreshQuestions = useCallback(async () => {
+    if (!session?.id) {
+      return;
+    }
+    setQuestionsLoading(true);
+    try {
+      const qs = await fetchSessionQuestions(session.id);
+      setQuestions(sortPresenterQuestions(qs));
+    } catch {
+      /* ignore */
+    } finally {
+      setQuestionsLoading(false);
+    }
+  }, [session?.id]);
+
   const socketRef = usePresenterSocket({
     sessionId: session?.id ?? "",
     sessionCode: session?.code ?? "",
     enabled: Boolean(session?.id && session?.code),
     onReconnect: () => void loadPresenterData().catch(() => {}),
+    onQuestionCreated: applyQuestionFromSocket,
+    onQuestionUpdated: applyQuestionFromSocket,
   });
+
+  useEffect(() => {
+    if (!session?.id) {
+      return;
+    }
+    void refreshQuestions();
+  }, [session?.id, refreshQuestions]);
+
+  useEffect(() => {
+    if (!showQuestions || !session?.id) {
+      return;
+    }
+    void refreshQuestions();
+  }, [showQuestions, session?.id, refreshQuestions]);
 
   useEffect(() => {
     if (!id) {
@@ -205,6 +248,20 @@ export function PresenterViewPage() {
     return `${id.slice(0, 6)}…${id.slice(-4)}`;
   }
 
+  const openQuestionCount = questions.filter((q) => !q.answered).length;
+
+  async function toggleQuestionAnswered(q: ApiSessionQuestion, answered: boolean) {
+    if (!session) {
+      return;
+    }
+    try {
+      const updated = await patchSessionQuestion(session.id, q.id, answered);
+      applyQuestionFromSocket(updated);
+    } catch {
+      useSessionStore.getState().setError("Could not update question");
+    }
+  }
+
   if (!id) {
     return null;
   }
@@ -282,6 +339,22 @@ export function PresenterViewPage() {
             onClick={() => setShowViewers((v) => !v)}
           >
             Viewers
+          </button>
+          <button
+            type="button"
+            className={`rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors ${
+              showQuestions
+                ? "border-prsnt-cta bg-sky-50 text-prsnt-cta"
+                : "border-teal-900/15 bg-white text-prsnt-ink hover:bg-prsnt-surface dark:border-white/10 dark:bg-zinc-800/80 dark:hover:bg-zinc-800"
+            }`}
+            onClick={() => setShowQuestions((v) => !v)}
+          >
+            Questions
+            {openQuestionCount > 0 ? (
+              <span className="ml-1.5 inline-flex min-w-[1.25rem] justify-center rounded-full bg-prsnt-cta px-1 text-[10px] font-semibold leading-5 text-white">
+                {openQuestionCount > 99 ? "99+" : openQuestionCount}
+              </span>
+            ) : null}
           </button>
           <button
             type="button"
@@ -409,6 +482,14 @@ export function PresenterViewPage() {
         onPrev={() => go(-1)}
         onNext={() => go(1)}
         disabled={totalSlides === 0}
+      />
+
+      <PresenterQuestionsDrawer
+        open={showQuestions}
+        onClose={() => setShowQuestions(false)}
+        questions={questions}
+        loading={questionsLoading}
+        onToggleAnswered={(q, answered) => void toggleQuestionAnswered(q, answered)}
       />
 
       {showQr ? (

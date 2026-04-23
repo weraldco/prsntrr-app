@@ -3,6 +3,7 @@ import type { Server } from "socket.io";
 import { z } from "zod";
 import { getAuth, requireAuth } from "../middleware/auth.js";
 import { validateBody } from "../middleware/validate.js";
+import * as questionService from "../services/question-service.js";
 import * as sessionService from "../services/session-service.js";
 import { slideRouter } from "./slide-routes.js";
 
@@ -15,9 +16,53 @@ const patchSchema = z.object({
   status: z.enum(["idle", "live", "ended"]).optional(),
 });
 
+const patchQuestionSchema = z.object({
+  answered: z.boolean(),
+});
+
 export const sessionRouter = Router({ mergeParams: true });
 
 sessionRouter.use(requireAuth);
+
+sessionRouter.get("/:sessionId/questions", async (req, res) => {
+  const { userId } = getAuth(req);
+  try {
+    const list = await questionService.listQuestionsForPresenter(req.params.sessionId, userId);
+    if (list === null) {
+      res.status(404).json({ error: "Session not found" });
+      return;
+    }
+    res.json(list);
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Server error" });
+  }
+});
+
+sessionRouter.patch(
+  "/:sessionId/questions/:questionId",
+  validateBody(patchQuestionSchema),
+  async (req, res) => {
+    const { userId } = getAuth(req);
+    const { answered } = req.body as z.infer<typeof patchQuestionSchema>;
+    try {
+      const updated = await questionService.setQuestionAnswered(
+        req.params.sessionId,
+        req.params.questionId,
+        userId,
+        answered,
+      );
+      if (!updated) {
+        res.status(404).json({ error: "Session or question not found" });
+        return;
+      }
+      const io = req.app.get("io") as Server | undefined;
+      io?.to(`presenter:${updated.sessionId}`).emit("question:updated", updated);
+      res.json(updated);
+    } catch (e) {
+      res.status(500).json({ error: e instanceof Error ? e.message : "Server error" });
+    }
+  },
+);
 
 sessionRouter.post("/", validateBody(createSchema), async (req, res) => {
   const { userId } = getAuth(req);

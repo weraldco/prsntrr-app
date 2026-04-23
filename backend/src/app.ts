@@ -6,6 +6,7 @@ import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { apiRateLimiter, publicSessionRateLimiter } from "./middleware/rate-limiter.js";
+import { publicQuestionRoutes } from "./routes/public-question-routes.js";
 import { publicSessionRoutes } from "./routes/public-session-routes.js";
 import { qrRoutes } from "./routes/qr-routes.js";
 import { sessionRouter } from "./routes/session-routes.js";
@@ -49,6 +50,7 @@ app.use("/uploads", express.static(uploadDir));
 
 app.use("/api/sessions/public", publicSessionRateLimiter);
 app.use("/api/sessions/public", qrRoutes);
+app.use("/api/sessions/public", publicQuestionRoutes);
 app.use("/api/sessions/public", publicSessionRoutes);
 app.use("/api/sessions", sessionRouter);
 

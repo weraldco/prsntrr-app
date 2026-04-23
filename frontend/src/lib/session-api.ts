@@ -24,6 +24,15 @@ export type ApiSlide = {
   content: ApiSlideContent;
 };
 
+export type ApiSessionQuestion = {
+  id: string;
+  sessionId: string;
+  body: string;
+  answered: boolean;
+  createdAt: string;
+  answeredAt: string | null;
+};
+
 export async function fetchMySessions(): Promise<ApiSession[]> {
   const res = await apiFetch("/api/sessions");
   if (!res.ok) {
@@ -137,4 +146,61 @@ export async function fetchPublicSession(code: string): Promise<{
     throw new Error("Session not found");
   }
   return parseJson(res);
+}
+
+function mapQuestionPayload(raw: Record<string, unknown>): ApiSessionQuestion {
+  return {
+    id: String(raw.id),
+    sessionId: String(raw.sessionId ?? raw.session_id),
+    body: String(raw.body),
+    answered: Boolean(raw.answered),
+    createdAt: String(raw.createdAt ?? raw.created_at),
+    answeredAt: raw.answeredAt != null ? String(raw.answeredAt) : raw.answered_at != null ? String(raw.answered_at) : null,
+  };
+}
+
+export async function fetchSessionQuestions(sessionId: string): Promise<ApiSessionQuestion[]> {
+  const res = await apiFetch(`/api/sessions/${encodeURIComponent(sessionId)}/questions`);
+  if (!res.ok) {
+    throw new Error("Failed to load questions");
+  }
+  const data = await parseJson<Record<string, unknown>[]>(res);
+  return data.map(mapQuestionPayload);
+}
+
+export async function patchSessionQuestion(
+  sessionId: string,
+  questionId: string,
+  answered: boolean,
+): Promise<ApiSessionQuestion> {
+  const res = await apiFetch(`/api/sessions/${encodeURIComponent(sessionId)}/questions/${encodeURIComponent(questionId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ answered }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to update question");
+  }
+  const raw = await parseJson<Record<string, unknown>>(res);
+  return mapQuestionPayload(raw);
+}
+
+export async function submitViewerQuestion(code: string, body: string): Promise<ApiSessionQuestion> {
+  const res = await apiFetch(`/api/sessions/public/${encodeURIComponent(code)}/questions`, {
+    method: "POST",
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) {
+    let msg = "Could not send question";
+    try {
+      const err = (await res.json()) as { error?: string };
+      if (err?.error) {
+        msg = err.error;
+      }
+    } catch {
+      /* ignore */
+    }
+    throw new Error(msg);
+  }
+  const raw = await parseJson<Record<string, unknown>>(res);
+  return mapQuestionPayload(raw);
 }

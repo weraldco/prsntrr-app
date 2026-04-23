@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Socket } from "socket.io-client";
 import { createSocket } from "../socket/client";
+import type { ApiSessionQuestion } from "../lib/session-api";
 import { useAuthStore } from "../store/auth-store";
 import { useSessionStore } from "../store/session-store";
 import type { SessionStatus } from "../store/session-store";
@@ -10,13 +11,26 @@ type Options = {
   sessionCode: string;
   enabled: boolean;
   onReconnect?: () => void | Promise<void>;
+  onQuestionCreated?: (q: ApiSessionQuestion) => void;
+  onQuestionUpdated?: (q: ApiSessionQuestion) => void;
 };
 
-export function usePresenterSocket({ sessionId, sessionCode, enabled, onReconnect }: Options) {
+export function usePresenterSocket({
+  sessionId,
+  sessionCode,
+  enabled,
+  onReconnect,
+  onQuestionCreated,
+  onQuestionUpdated,
+}: Options) {
   const token = useAuthStore((s) => s.accessToken);
   const socketRef = useRef<Socket | null>(null);
   const onReconnectRef = useRef(onReconnect);
   onReconnectRef.current = onReconnect;
+  const onQuestionCreatedRef = useRef(onQuestionCreated);
+  const onQuestionUpdatedRef = useRef(onQuestionUpdated);
+  onQuestionCreatedRef.current = onQuestionCreated;
+  onQuestionUpdatedRef.current = onQuestionUpdated;
 
   useEffect(() => {
     if (!enabled || !token) {
@@ -97,6 +111,14 @@ export function usePresenterSocket({ sessionId, sessionCode, enabled, onReconnec
         });
       },
     );
+
+    socket.on("question:created", (payload: ApiSessionQuestion) => {
+      onQuestionCreatedRef.current?.(payload);
+    });
+
+    socket.on("question:updated", (payload: ApiSessionQuestion) => {
+      onQuestionUpdatedRef.current?.(payload);
+    });
 
     return () => {
       socket.disconnect();
