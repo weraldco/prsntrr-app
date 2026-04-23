@@ -38,6 +38,29 @@ sessionRouter.get("/:sessionId/questions", async (req, res) => {
   }
 });
 
+sessionRouter.delete("/:sessionId/questions/:questionId", async (req, res) => {
+  const { userId } = getAuth(req);
+  try {
+    const deleted = await questionService.deleteQuestionForPresenter(
+      req.params.sessionId,
+      req.params.questionId,
+      userId,
+    );
+    if (!deleted) {
+      res.status(404).json({ error: "Session or question not found" });
+      return;
+    }
+    const io = req.app.get("io") as Server | undefined;
+    io?.to(`presenter:${req.params.sessionId}`).emit("question:deleted", {
+      id: req.params.questionId,
+      sessionId: req.params.sessionId,
+    });
+    res.status(204).end();
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Server error" });
+  }
+});
+
 sessionRouter.patch(
   "/:sessionId/questions/:questionId",
   validateBody(patchQuestionSchema),

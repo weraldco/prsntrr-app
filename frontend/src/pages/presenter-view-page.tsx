@@ -8,6 +8,7 @@ import {
   type ApiSlide,
   fetchSession,
   fetchSessionQuestions,
+  deleteSessionQuestion,
   fetchSlides,
   patchSessionQuestion,
   updateSession,
@@ -81,6 +82,10 @@ export function PresenterViewPage() {
     setQuestions((prev) => sortPresenterQuestions([...prev.filter((x) => x.id !== q.id), q]));
   }, []);
 
+  const removeQuestionFromList = useCallback((questionId: string) => {
+    setQuestions((prev) => prev.filter((x) => x.id !== questionId));
+  }, []);
+
   const refreshQuestions = useCallback(async () => {
     if (!session?.id) {
       return;
@@ -103,6 +108,7 @@ export function PresenterViewPage() {
     onReconnect: () => void loadPresenterData().catch(() => {}),
     onQuestionCreated: applyQuestionFromSocket,
     onQuestionUpdated: applyQuestionFromSocket,
+    onQuestionDeleted: ({ id }) => removeQuestionFromList(id),
   });
 
   useEffect(() => {
@@ -259,6 +265,18 @@ export function PresenterViewPage() {
       applyQuestionFromSocket(updated);
     } catch {
       useSessionStore.getState().setError("Could not update question");
+    }
+  }
+
+  async function deleteQuestion(q: ApiSessionQuestion) {
+    if (!session) {
+      return;
+    }
+    try {
+      await deleteSessionQuestion(session.id, q.id);
+      removeQuestionFromList(q.id);
+    } catch {
+      useSessionStore.getState().setError("Could not delete question");
     }
   }
 
@@ -490,6 +508,7 @@ export function PresenterViewPage() {
         questions={questions}
         loading={questionsLoading}
         onToggleAnswered={(q, answered) => void toggleQuestionAnswered(q, answered)}
+        onDelete={(q) => void deleteQuestion(q)}
       />
 
       {showQr ? (

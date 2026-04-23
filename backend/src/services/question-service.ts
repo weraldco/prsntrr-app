@@ -122,3 +122,25 @@ export async function setQuestionAnswered(
   }
   return mapQuestion(data as QuestionRow);
 }
+
+export async function deleteQuestionForPresenter(
+  sessionId: string,
+  questionId: string,
+  presenterId: string,
+): Promise<boolean> {
+  const session = await sessionService.getSessionForPresenter(sessionId, presenterId);
+  if (!session) {
+    return false;
+  }
+  const { data, error } = await supabaseAdmin
+    .from("session_questions")
+    .delete()
+    .eq("id", questionId)
+    .eq("session_id", sessionId)
+    .select("id")
+    .maybeSingle();
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data != null;
+}

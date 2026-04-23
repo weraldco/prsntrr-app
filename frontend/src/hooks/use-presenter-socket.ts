@@ -13,6 +13,7 @@ type Options = {
   onReconnect?: () => void | Promise<void>;
   onQuestionCreated?: (q: ApiSessionQuestion) => void;
   onQuestionUpdated?: (q: ApiSessionQuestion) => void;
+  onQuestionDeleted?: (payload: { id: string; sessionId: string }) => void;
 };
 
 export function usePresenterSocket({
@@ -22,6 +23,7 @@ export function usePresenterSocket({
   onReconnect,
   onQuestionCreated,
   onQuestionUpdated,
+  onQuestionDeleted,
 }: Options) {
   const token = useAuthStore((s) => s.accessToken);
   const socketRef = useRef<Socket | null>(null);
@@ -29,8 +31,10 @@ export function usePresenterSocket({
   onReconnectRef.current = onReconnect;
   const onQuestionCreatedRef = useRef(onQuestionCreated);
   const onQuestionUpdatedRef = useRef(onQuestionUpdated);
+  const onQuestionDeletedRef = useRef(onQuestionDeleted);
   onQuestionCreatedRef.current = onQuestionCreated;
   onQuestionUpdatedRef.current = onQuestionUpdated;
+  onQuestionDeletedRef.current = onQuestionDeleted;
 
   useEffect(() => {
     if (!enabled || !token) {
@@ -118,6 +122,10 @@ export function usePresenterSocket({
 
     socket.on("question:updated", (payload: ApiSessionQuestion) => {
       onQuestionUpdatedRef.current?.(payload);
+    });
+
+    socket.on("question:deleted", (payload: { id: string; sessionId: string }) => {
+      onQuestionDeletedRef.current?.(payload);
     });
 
     return () => {

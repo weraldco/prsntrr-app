@@ -184,6 +184,15 @@ export async function patchSessionQuestion(
   return mapQuestionPayload(raw);
 }
 
+export async function deleteSessionQuestion(sessionId: string, questionId: string): Promise<void> {
+  const res = await apiFetch(`/api/sessions/${encodeURIComponent(sessionId)}/questions/${encodeURIComponent(questionId)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    throw new Error("Failed to delete question");
+  }
+}
+
 export async function submitViewerQuestion(code: string, body: string): Promise<ApiSessionQuestion> {
   const res = await apiFetch(`/api/sessions/public/${encodeURIComponent(code)}/questions`, {
     method: "POST",
