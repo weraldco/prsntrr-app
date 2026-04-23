@@ -1,14 +1,23 @@
-import { type FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { type FormEvent, useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AppShell } from "../components/app-shell";
+import { OauthProviderButtons } from "../components/oauth-provider-buttons";
 import { loginRequest } from "../store/auth-store";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const q = searchParams.get("error");
+    if (q) {
+      setError(q);
+    }
+  }, [searchParams]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -60,6 +69,7 @@ export function LoginPage() {
               {loading ? "Signing in…" : "Sign in"}
             </button>
           </form>
+          <OauthProviderButtons onError={setError} disabled={loading} />
           <p className="text-sm text-prsnt-ink/55">
             No account?{" "}
             <Link className="prsnt-link" to="/register">

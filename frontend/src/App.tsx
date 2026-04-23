@@ -6,6 +6,7 @@ import { useAuthStore } from "./store/auth-store";
 import { CreateSessionPage } from "./pages/create-session-page";
 import { DashboardPage } from "./pages/dashboard-page";
 import { LandingPage } from "./pages/landing-page";
+import { AuthCallbackPage } from "./pages/auth-callback-page";
 import { LoginPage } from "./pages/login-page";
 import { PresenterViewPage } from "./pages/presenter-view-page";
 import { RegisterPage } from "./pages/register-page";
@@ -48,6 +49,7 @@ export default function App() {
             </GuestOnlyRoute>
           }
         />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route
           path="/dashboard"
           element={

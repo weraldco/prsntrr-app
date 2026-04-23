@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppShell } from "../components/app-shell";
+import { OauthProviderButtons } from "../components/oauth-provider-buttons";
 import { registerRequest } from "../store/auth-store";
 
 export function RegisterPage() {
@@ -66,6 +67,7 @@ export function RegisterPage() {
               {loading ? "Creating…" : "Create account"}
             </button>
           </form>
+          <OauthProviderButtons onError={setError} disabled={loading} />
           <p className="text-sm text-prsnt-ink/55">
             Already have an account?{" "}
             <Link className="prsnt-link" to="/login">

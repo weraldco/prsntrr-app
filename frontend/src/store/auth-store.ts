@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { getAuthCallbackUrl } from "../lib/auth-callback-url";
 import { supabase } from "../lib/supabase";
 import { bindAccessToken } from "../lib/api-client";
 
@@ -21,10 +22,17 @@ function mapUser(u: {
   email?: string;
   user_metadata?: Record<string, unknown>;
 }): AuthUser {
+  const meta = u.user_metadata ?? {};
+  const name =
+    (meta.full_name as string) ||
+    (meta.name as string) ||
+    (meta.user_name as string) ||
+    (meta.preferred_username as string) ||
+    "";
   return {
     id: u.id,
     email: u.email ?? "",
-    name: (u.user_metadata?.name as string) ?? "",
+    name,
   };
 }
 
@@ -64,6 +72,32 @@ export async function loginRequest(email: string, password: string): Promise<voi
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     throw new Error(error.message);
+  }
+}
+
+export type OAuthProviderId = "google" | "github";
+
+export async function signInWithOAuthProvider(provider: OAuthProviderId): Promise<void> {
+  const redirectTo = getAuthCallbackUrl();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo,
+      ...(provider === "google"
+        ? {
+            queryParams: {
+              access_type: "offline",
+              prompt: "consent",
+            },
+          }
+        : {}),
+    },
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+  if (data.url) {
+    window.location.assign(data.url);
   }
 }
 
